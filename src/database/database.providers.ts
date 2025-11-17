@@ -11,14 +11,6 @@ export const MySQLDataSource = new DataSource({
     synchronize: true,
 });
 
-try {
-    MySQLDataSource.initialize();
-    console.log('--> Conectado a MySQL');
-} catch (error) {
-    console.log('Error al conectar a MySQL:', error);
-    // process.exit(1);
-}
-
 export const PostgreSQLDataSource = new DataSource({
     type: 'postgres',
     host: process.env.DB_POSTGRES_HOST,
@@ -30,10 +22,31 @@ export const PostgreSQLDataSource = new DataSource({
     synchronize: true,
 });
 
-try {
-    PostgreSQLDataSource.initialize();
-    console.log('--> Conectado a PostgreSQL');
-} catch (error) {
-    console.log('Error al conectar a PostgreSQL:', error);
-    // process.exit(1);
-}
+export const databaseProviders = [
+    {
+        provide: 'MYSQL_DATA_SOURCE',
+        useFactory: async () => {
+            try {
+                await MySQLDataSource.initialize();
+                console.log('--> Conectado a MySQL');
+                return MySQLDataSource;
+            } catch (error) {
+                console.log('Error al conectar a MySQL:', error);
+                throw error;
+            }
+        },
+    },
+    {
+        provide: 'POSTGRESQL_DATA_SOURCE',
+        useFactory: async () => {
+            try {
+                await PostgreSQLDataSource.initialize();
+                console.log('--> Conectado a PostgreSQL');
+                return PostgreSQLDataSource;
+            } catch (error) {
+                console.log('Error al conectar a PostgreSQL:', error);
+                throw error;
+            }
+        },
+    },
+];
